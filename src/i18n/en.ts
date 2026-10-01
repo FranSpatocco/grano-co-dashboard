@@ -8,7 +8,7 @@ export const en: Dictionary = {
     subtitle: "Check the shop's sales, products and orders.",
     heroTitle: "Coffee,\nby the numbers.",
     heroText: "Your coffee shop's sales, products and orders on one screen, plus a weekly summary that tells you what to do next.",
-    since: "PALERMO · BUENOS AIRES · SINCE 2019",
+    since: "PALERMO · BUENOS AIRES · SINCE 2026",
     demo: "Open the dashboard",
     demoHint: "Read-only access, no sign-up needed",
     or: "or with your account",

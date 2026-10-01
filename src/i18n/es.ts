@@ -9,7 +9,7 @@ export const es = {
     subtitle: "Consultá las ventas, los productos y los pedidos del local.",
     heroTitle: "El café,\nen números.",
     heroText: "Ventas, productos y pedidos de tu cafetería en una sola pantalla, con un resumen semanal que te dice qué hacer.",
-    since: "PALERMO · BUENOS AIRES · DESDE 2019",
+    since: "PALERMO · BUENOS AIRES · DESDE 2026",
     demo: "Entrar al panel",
     demoHint: "Acceso de solo lectura, sin registrarte",
     or: "o con tu cuenta",
