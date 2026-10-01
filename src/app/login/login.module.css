@@ -1,0 +1,209 @@
+.login {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.side {
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  border-right: 1px solid var(--border);
+}
+
+.sideTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.brandMark {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+
+.illus {
+  color: var(--fg);
+}
+
+.steam {
+  stroke: var(--accent);
+}
+
+.hero {
+  font-size: clamp(44px, 5vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 28px 0 16px;
+  white-space: pre-line;
+}
+
+.heroText {
+  font-size: 18px;
+  max-width: 34ch;
+  margin: 0;
+  color: var(--muted);
+}
+
+.since {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  margin: 0;
+  color: var(--muted);
+}
+
+.formSide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+
+.form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 500;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.enter {
+  min-height: 64px;
+  border-radius: 16px;
+  font-size: 17px;
+  justify-content: space-between;
+  padding: 0 22px;
+  width: 100%;
+}
+
+.enterText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.enterHint {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.or::before,
+.or::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input {
+  position: relative;
+}
+.input input {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  padding: 0 14px 0 44px;
+  font-size: 15px;
+}
+.input svg {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  color: var(--muted);
+}
+
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--down);
+}
+
+.submit {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+}
+
+.footer {
+  font-size: 13px;
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .side {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px 28px;
+  }
+  .illus,
+  .since {
+    display: none;
+  }
+  .hero {
+    font-size: 40px;
+    margin-top: 8px;
+  }
+  .heroText {
+    font-size: 16px;
+  }
+  .formSide {
+    padding: 28px 16px 40px;
+  }
+}

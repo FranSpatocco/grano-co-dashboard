@@ -1,0 +1,636 @@
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px 40px 56px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Header ---- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brandMark {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  flex: none;
+}
+.brandName {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.brandSub {
+  font-size: 13px;
+  color: var(--muted);
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+}
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--soft);
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+  font-weight: 500;
+  font-size: 13px;
+  flex: none;
+}
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+}
+.iconBtn:hover {
+  background: var(--soft);
+}
+
+.customRange {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.dateField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.dateField input {
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--fg);
+}
+
+/* ---- Saludo ---- */
+.hello {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 36px 0 28px;
+  flex-wrap: wrap;
+}
+.hello h1 {
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.hello p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+/* ---- KPIs ---- */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.kpiLabel {
+  font-size: 14px;
+  color: var(--muted);
+}
+.kpiValue {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  margin: 14px 0 10px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.kpiText {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+}
+.kpiHero {
+  border-color: var(--accent);
+}
+.kpiHero .kpiValue {
+  color: var(--accent);
+}
+.delta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+/* ---- Grilla principal ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+}
+.s8 {
+  grid-column: span 8;
+}
+.s4 {
+  grid-column: span 4;
+}
+.s7 {
+  grid-column: span 7;
+}
+.s5 {
+  grid-column: span 5;
+}
+.s12 {
+  grid-column: span 12;
+}
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* ---- Gráfico de ventas ---- */
+.legend {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.legend i {
+  display: inline-block;
+  width: 18px;
+  border-top: 2.5px solid var(--fg);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.legend i.legendPrev {
+  border-top: 1.5px dashed var(--muted);
+}
+.chartBox {
+  width: 100%;
+  height: 260px;
+}
+.tooltip {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.tooltip strong {
+  font-weight: 500;
+}
+
+/* ---- Categorías ---- */
+.cats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.catRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  align-items: center;
+  font-size: 14px;
+}
+.catName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+.catVal {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  text-align: right;
+}
+.track {
+  grid-column: 1 / -1;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+.bar {
+  height: 100%;
+  border-radius: 999px;
+}
+
+/* ---- Mapa de calor ---- */
+.heat {
+  display: grid;
+  grid-template-columns: 40px repeat(15, minmax(0, 1fr));
+  gap: 4px;
+  align-items: center;
+}
+.heatBands {
+  grid-template-columns: 40px repeat(5, minmax(0, 1fr));
+}
+.hd {
+  font: 11px var(--font-mono), monospace;
+  color: var(--muted);
+  text-align: center;
+}
+.dl {
+  font-size: 13px;
+  color: var(--muted);
+}
+.cell {
+  height: 30px;
+  border-radius: 6px;
+}
+.heatBands .cell {
+  height: 34px;
+}
+.h1 {
+  background: var(--heat-1);
+}
+.h2 {
+  background: var(--heat-2);
+}
+.h3 {
+  background: var(--heat-3);
+}
+.h4 {
+  background: var(--heat-4);
+}
+.h5 {
+  background: var(--heat-5);
+}
+.peak {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.heatMobile {
+  display: none;
+}
+.heatLegend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.callout {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: var(--fg);
+}
+.calloutIcon {
+  color: var(--accent);
+  flex: none;
+  margin-top: 2px;
+}
+.scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.swatch {
+  width: 22px;
+  height: 12px;
+  border-radius: 3px;
+}
+.scrollX {
+  overflow-x: auto;
+}
+
+/* ---- Stock ---- */
+.stockList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.stockItem {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stockItem:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.stockIcon {
+  color: var(--stock);
+}
+.stockName {
+  font-weight: 500;
+}
+.stockMeta {
+  grid-column: 2 / 3;
+  font-size: 13px;
+  color: var(--muted);
+}
+.stockLeft {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  color: var(--stock);
+  text-align: right;
+  grid-row: 1 / 3;
+  grid-column: 3;
+}
+.level {
+  grid-column: 2 / 4;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.level span {
+  display: block;
+  height: 100%;
+  background: var(--stock);
+  border-radius: 999px;
+}
+.stockBadge {
+  color: var(--stock);
+  border-color: var(--stock);
+}
+
+/* ---- Pedidos ---- */
+.ordersHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 300px;
+}
+.search label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.search input {
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  padding: 0 16px 0 42px;
+  font-size: 14px;
+  width: 100%;
+}
+.search svg {
+  position: absolute;
+  left: 15px;
+  bottom: 13px;
+  color: var(--muted);
+}
+.sort {
+  border: 0;
+  background: transparent;
+  min-height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+}
+.sortActive {
+  color: var(--fg);
+}
+.pay {
+  font-size: 13px;
+  color: var(--muted);
+}
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+.pages {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pageBtn {
+  min-width: 44px;
+  justify-content: center;
+  padding: 0 10px;
+  font-family: var(--font-mono), monospace;
+}
+.ordersList {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.orderItem {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+}
+.orderItem:last-child {
+  border-bottom: 0;
+}
+
+.loadingBlock {
+  height: 220px;
+}
+
+.footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 760px) {
+  .wrap {
+    padding: 16px 16px 40px;
+  }
+  .topbar {
+    gap: 12px;
+    padding-bottom: 14px;
+  }
+  .brandSub,
+  .userText {
+    display: none;
+  }
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .chips {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .hello {
+    margin: 22px 0 18px;
+  }
+  .hello h1 {
+    font-size: 30px;
+  }
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .kpis :global(.card) {
+    padding: 16px;
+  }
+  .kpiLabel {
+    font-size: 13px;
+  }
+  .kpiValue {
+    font-size: 22px;
+    margin: 10px 0 8px;
+  }
+  .kpiText {
+    font-size: 20px;
+  }
+  .vs {
+    display: none;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .grid > * {
+    grid-column: auto;
+  }
+  .leftCol {
+    display: contents;
+  }
+  .grid :global(.card) {
+    padding: 18px;
+  }
+  .oLine {
+    order: 1;
+  }
+  .oCat {
+    order: 2;
+  }
+  .oHeat {
+    order: 3;
+  }
+  .oAi {
+    order: 4;
+  }
+  .oStock {
+    order: 5;
+  }
+  .oOrders {
+    order: 6;
+  }
+  .legendPrevItem {
+    display: none;
+  }
+  .chartBox {
+    height: 200px;
+  }
+  .heatDesktop {
+    display: none;
+  }
+  .heatMobile {
+    display: block;
+  }
+  .ordersTable {
+    display: none;
+  }
+  .ordersList {
+    display: block;
+  }
+  .search {
+    min-width: 0;
+    width: 100%;
+  }
+}

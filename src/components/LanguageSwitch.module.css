@@ -1,0 +1,27 @@
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  flex: none;
+}
+
+.seg button {
+  min-height: 42px;
+  min-width: 48px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.seg button:hover {
+  background: var(--soft);
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--fg);
+  color: var(--bg);
+}

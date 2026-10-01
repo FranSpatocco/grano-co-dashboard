@@ -1,0 +1,5 @@
+.env*
+!.env.example
+.playwright-cli
+node_modules
+.next

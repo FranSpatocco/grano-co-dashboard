@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// El panel solo lee. Los datos los escribe scripts/seed.ts con el Admin SDK, y la caché
+// y los contadores de IA los escribe el servidor (el Admin SDK ignora estas reglas).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /dailyStats/{date} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /orders/{orderId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /stock/{itemId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    // Resúmenes de IA y límites de uso: solo el servidor.
+    match /aiSummaries/{doc} {
+      allow read, write: if false;
+    }
+    match /aiUsage/{doc} {
+      allow read, write: if false;
+    }
+  }
+}

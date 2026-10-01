@@ -1,0 +1,358 @@
+================================================================
+BITÁCORA TÉCNICA — DASHBOARD CAFETERÍA (Grano & Co.)
+================================================================
+Registro de todo lo que se usa, se decide y se aprende.
+Regla: se anota en el momento, no al final.
+Al cerrar cada fase, pasar las tecnologías nuevas al "Resumen para
+CV / LinkedIn" de la bitácora del portfolio.
+
+Formato de cada entrada:
+  [FECHA] CATEGORÍA — Nombre
+  Qué es: (una línea)
+  Para qué lo usé: (en este proyecto)
+  Por qué esto y no otra cosa:
+  Lo que aprendí / problema que resolví:
+
+Categorías: STACK · HERRAMIENTA · DECISIÓN · DESCARTADO · PROBLEMA · CONCEPTO
+
+================================================================
+FASE 0 — PLANIFICACIÓN
+================================================================
+
+[30/09/2026] CONCEPTO — Dashboard
+Qué es: panel que reúne datos en una sola pantalla para entender algo
+  de un vistazo y tomar decisiones (KPIs, gráficos, tablas, filtros).
+Por qué en el portfolio: es lo que más se hace en un trabajo real de
+  frontend. Demuestra APIs, estados, componentes reutilizables, gráficos,
+  filtros, autenticación y tipado.
+
+[30/09/2026] DECISIÓN — Temática: cafetería de especialidad
+Por qué: tiene patrones de datos interesantes (horarios pico, fines de
+  semana, estacionalidad), variedad de categorías y cualquiera lo
+  entiende en 5 segundos. También sirve para vender paneles a comercios.
+
+[30/09/2026] DECISIÓN — Datos simulados con estadísticas preagregadas
+Qué es: el script de seed guarda los pedidos y además resúmenes diarios
+  (colección dailyStats).
+Por qué: el panel lee pocos documentos en lugar de miles. Menos lecturas
+  de Firestore = menos costo y carga más rápida.
+Concepto para entrevistas: "desnormalización" / "preagregación".
+
+[30/09/2026] DECISIÓN — Botón "Entrar como demo"
+Por qué: un recruiter no se va a registrar para ver un proyecto. Acceso
+  en un clic, con usuario de solo lectura.
+
+[30/09/2026] STACK — Recharts
+Qué es: librería de gráficos para React.
+Para qué lo usé: el gráfico de línea de evolución de ventas (por hora o
+  por día, con el período anterior punteado y el mejor punto en caramelo).
+Por qué: la más usada en React, con componentes declarativos.
+Lo que aprendí: en Recharts 3 accessibilityLayer viene activado por
+  defecto y el componente Cell está deprecado (se reemplaza por la prop
+  shape). Los atributos SVG que genera no leen variables CSS de forma
+  confiable, así que los colores del gráfico se repiten en src/lib/theme.ts.
+  El dot personalizado se tipa con DotItemDotProps.
+Cambio de plan: el mapa de calor y las categorías quedaron en HTML/CSS
+  propio (grilla y barras con etiqueta directa). Recharts no tiene heatmap
+  y las barras HTML se leen mejor con lector de pantalla.
+
+[30/09/2026] STACK — TanStack Query (react-query)
+Qué es: librería para manejar datos remotos (caché, carga, errores,
+  reintentos).
+Para qué lo usé: todas las lecturas de Firestore.
+Por qué: aparece en ofertas reales y evita manejar loading/error a mano.
+Lo que aprendí: la queryKey incluye el origen de datos y el rango
+  (["stats", "demo", desde, hasta]); cambiar de período es cambiar de
+  clave, y volver a uno ya visto sale de la caché al instante. Para
+  "Regenerar" se usa useMutation y, al terminar, setQueryData actualiza la
+  caché del resumen sin volver a pedirlo.
+
+[30/09/2026] STACK — Firebase Auth + Firestore + Admin SDK
+Para qué lo usé: login, base de datos y verificación del token en la
+  API Route antes de llamar a la IA.
+Lo que aprendí: (completar; ej.: reglas de seguridad de Firestore)
+
+[30/09/2026] STACK — Zod
+Qué es: librería de validación de datos con tipado para TypeScript.
+Para qué lo usé: validar lo que llega de Firestore y de la IA.
+Lo que aprendí: un solo esquema sirve para tres cosas: el tipo de
+  TypeScript (z.infer), la validación en tiempo de ejecución (parse /
+  safeParse) y, con betaZodOutputFormat, el formato de salida que se le
+  exige a Claude. También valida las respuestas de /api/summary en el
+  cliente.
+
+[30/09/2026] STACK — API de Claude (@anthropic-ai/sdk)
+Para qué lo usé: resumen semanal con insights, desde un Route Handler
+  de Next.js.
+Seguridad: API key solo en variables de entorno del servidor. Límite de
+  5 resúmenes por usuario por día y caché por semana para controlar
+  costos.
+Lo que aprendí: modelo claude-opus-5-5 con client.beta.messages.parse +
+  salida estructurada (Zod), thinking adaptativo y effort "medium". Se
+  activa fallbacks: "default" (beta server-side-fallback-2026-07-01): si
+  los clasificadores de seguridad rechazan el pedido, la API lo reintenta
+  en otro modelo. Hay que revisar stop_reason === "refusal" antes de leer
+  la respuesta. El prompt recibe un JSON chico con las estadísticas de la
+  semana (no los pedidos crudos) y pide usar solo números presentes.
+  Controles de costo: caché por semana e idioma, 5 regeneraciones por
+  usuario por día y tope global diario (AI_GLOBAL_DAILY_CAP).
+
+[30/09/2026] HERRAMIENTA — Vitest
+Para qué lo usé: tests de las funciones de cálculo de KPIs.
+Lo que aprendí: 17 tests (tests/): totales con corte horario, variación y
+  tendencia, categorías, mapa de calor y franja pico, rangos de fechas, y
+  que el generador de demo sea determinístico y coherente. La config va en
+  vitest.config.mts (con .ts avisaba por ESM en un paquete CommonJS) y
+  replica el alias @/ de tsconfig.
+
+[30/09/2026] HERRAMIENTA — playwright-cli (@playwright/cli 0.1.22)
+Qué es: CLI de Playwright para manejar un navegador desde la terminal
+  (abrir páginas, snapshots, clicks, capturas, emular tema/mobile).
+Para qué lo usé: queda instalado (global + navegador con
+  `playwright-cli install-browser`) para verificar visualmente el
+  dashboard: desktop 1440, mobile 390, claro/oscuro, reduced-motion.
+Por qué esto y no otra cosa: permite que Claude Code vea la app real sin
+  armar una suite de tests E2E completa.
+Lo que aprendí / problema que resolví: ya estaba instalado en la última
+  versión; faltaba descargar el navegador. Probado con `open about:blank`.
+
+[30/09/2026] HERRAMIENTA — MCP en Claude Code (context7, Claude Docs)
+Qué es: servidores que le dan a Claude Code acceso a herramientas externas.
+Para qué lo usé: context7 para consultar la documentación actualizada de
+  las librerías del stack antes de codear; Claude Docs para documentos.
+Por qué: evita usar APIs desactualizadas de memoria.
+
+[30/09/2026] DECISIÓN — CLAUDE.md generado desde prompt-claude-design.md
+Qué es: archivo de contexto que Claude Code lee al empezar cada sesión.
+Por qué: no existía un PRD.md; el brief de diseño + esta bitácora ya
+  definen producto, stack, diseño, pantallas y accesibilidad.
+Qué se agregó además: estructura de carpetas propuesta (Next.js App
+  Router), colecciones de Firestore, patrón i18n (diccionarios es/en
+  tipados + hook useT + localStorage), manejo de variables de entorno y
+  la regla de registrar todo en esta bitácora.
+
+================================================================
+FASE 1 — DISEÑO (Claude Design)
+================================================================
+[30/09/2026] DECISIÓN — Dirección visual "cálida y editorial"
+Qué es: estética de cafetería de especialidad (crema, espresso, caramelo,
+  serif editorial) en lugar de la estética técnica del portfolio.
+Por qué: el producto es un comercio gastronómico; un look de plano de
+  ingeniería no encaja con la marca. Además muestra rango de diseño.
+Qué se reutilizó de "Plano técnico" (coherencia entre proyectos):
+  Space Grotesk para la interfaz, JetBrains Mono para cifras y el acento
+  naranja, llevado a un tono caramelo.
+Gesto memorable: el resumen de IA se "imprime" como un ticket de café.
+
+[30/09/2026] CONCEPTO — Contraste WCAG AA (texto 4.5:1, UI 3:1)
+Qué es: relación de luminancia entre dos colores. Texto normal necesita
+  4.5:1; bordes de controles, íconos y foco necesitan 3:1 (criterio 1.4.11).
+Para qué lo usé: chequeé los tokens del brief con un script de Node antes
+  de mandarlo a Claude Design.
+Resultado (claro / oscuro):
+  fg/bg 14.38 / 15.42 · muted/bg 5.80 / 8.46 · accent/bg 5.12 / 6.87 ·
+  texto sobre accent 5.63 / 6.87 → todo OK.
+  border/bg 1.24 / 1.39 → FALLA para controles.
+Lo que resolví: el border queda solo decorativo (cards, filas) y se agregó
+  el token border-strong #948070 / #806C5C (3.32–3.65 / 3.40–3.66) para
+  inputs, chips y controles. Actualizado en el brief y en CLAUDE.md.
+
+[30/09/2026] DECISIÓN — Brief: escala del mapa de calor y línea de ventas
+Qué es: se agregó al brief pedir una escala secuencial crema→espresso
+  para el heatmap y una línea de ventas neutra.
+Por qué: el caramelo está reservado para el dato destacado; si el heatmap
+  o la línea lo usaran, pierde fuerza como señal.
+
+[30/09/2026] HERRAMIENTA — Canvas de diseño en claude.ai (Claude Design)
+Qué es: lienzo con artboards HTML interactivos, privado.
+Link: https://claude.ai/artifact/NMUcgS4k8n9VpmcV5r1T15
+Para qué lo usé: primera versión del diseño a partir del brief. 9 artboards:
+  sistema visual, login, vista general (claro, espresso, mobile 390) y
+  4 estados (IA cargando / error / datos insuficientes, pedidos vacío).
+  La vista general es interactiva: período, tema, orden, búsqueda,
+  paginación y "Regenerar" (skeleton → ticket que se imprime).
+Cómo: los artboards se generan con un script de Node (gen.mjs, en el
+  scratchpad de la sesión) para que las 3 vistas compartan tokens y datos.
+
+[30/09/2026] DECISIÓN — Paleta derivada (propuesta, falta aprobar)
+Contraste medido contra surface (claro / oscuro), todo ≥4.5:1:
+  Categorías: café #5C3A24 / #D2A987 · pastelería #9A6B1F / #DDB462 ·
+  sándwiches #5A6B34 / #AFBE7A · bebidas frías #2F6B78 / #8CC0CB ·
+  café en grano #7D3448 / #DC98A8
+  Sube #2F6A36 / #8DCB8A (flecha ↑) · Baja #A12D3A / #F29AA0 (flecha ↓) ·
+  Estable #6B5A4C / #BFAE9C (flecha →, entre −1% y +1%) ·
+  Stock bajo #8A5A00 / #E8B75A (triángulo de alerta)
+  Heatmap claro #F1E4D0 #DDBF98 #BF9166 #8A5E3C #4A2E1C;
+  oscuro #2F251F #553F2F #8A6547 #C29468 #EFD2AE
+Por qué: tonos inspirados en cada categoría que no compiten con el
+  caramelo; los estados se distinguen también por ícono y texto oculto.
+Detalle: el ticket en modo oscuro sigue siendo "papel" (#EFE6D8) para que
+  el gesto memorable se mantenga en los dos temas.
+
+[30/09/2026] DECISIÓN — Solo modo claro; se aprueba la paleta
+Qué: el diseño se aprobó a simple vista y se decidió implementar solo el
+  modo claro "crema". El modo espresso queda DESCARTADO por ahora.
+Por qué: menos superficie para mantener y probar; el modo claro es el
+  principal del brief. La paleta clara de arriba queda como sistema final
+  (ver CLAUDE.md).
+
+================================================================
+FASE 2 — DESARROLLO
+================================================================
+[30/09/2026] STACK — Next.js 16.3.8 (create-next-app)
+Qué es: esqueleto del proyecto (App Router, TypeScript, src/, ESLint,
+  alias @/*, sin Tailwind).
+Para qué lo usé: base del proyecto. Se generó en una carpeta temporal y se
+  copió acá para no pisar el CLAUDE.md propio. Trae AGENTS.md: avisa que
+  Next 16 cambió APIs y que hay que leer node_modules/next/dist/docs/.
+Por qué sin Tailwind: los tokens del diseño van como variables CSS
+  (claro/oscuro) + CSS Modules, que Next trae incluidos.
+Nota: se adelantó antes de cerrar la Fase 1; queda en pausa hasta tener
+  el diseño definido.
+
+[30/09/2026] PROBLEMA — npm ERESOLVE al instalar vitest + tsx
+Qué pasó: dependencias instaladas OK (firebase, firebase-admin,
+  @tanstack/react-query, recharts, zod, @anthropic-ai/sdk); la instalación
+  de dev (vitest, tsx) falló por conflicto de peer dependencies.
+Causa: Vitest 5 pide @types/node ^22 o >=24 y create-next-app instala la 20.
+Solución: npm install -D @types/node@^22 vitest tsx (Node local es 22).
+
+[30/09/2026] DECISIÓN — Modo demo por defecto + Firebase opcional
+Qué es: sin variables de entorno, la app genera los datos en el navegador
+  con un generador determinístico (src/lib/demo/generator.ts): 60 días de
+  pedidos relativos a hoy, en hora de Buenos Aires. Con NEXT_PUBLIC_FIREBASE_*
+  lee Firestore. Las dos fuentes cumplen la misma interfaz DataSource.
+Por qué: permite publicar en Vercel ya, sin esperar el proyecto de
+  Firebase, y la demo nunca "envejece" (siempre muestra la semana actual).
+Concepto para entrevistas: "patrón repositorio / inyección de la fuente
+  de datos"; PRNG con semilla (mulberry32 + hash FNV de la fecha).
+Detalles realistas del generador: sábados de 17 a 19 h con pico, medialunas
+  que se agotan antes de las 11 h los domingos, bebidas frías que suben en
+  primavera, un nivel distinto por semana.
+
+[30/09/2026] DECISIÓN — Resumen sin IA calculado con reglas
+Qué es: si no hay ANTHROPIC_API_KEY, /api/summary arma los 3 hallazgos con
+  reglas sobre los mismos datos (franja pico, producto que más crece
+  cruzado con stock, faltantes antes del mediodía). El ticket dice
+  "Modo demo · sin IA" y el botón Regenerar no aparece.
+Por qué: la demo pública muestra el panel completo y es honesta sobre de
+  dónde sale el texto.
+
+[30/09/2026] CONCEPTO — "Hoy" contra el mismo día de la semana pasada
+Qué es: un martes a las 20 h se compara con el martes anterior hasta las
+  20 h (se usan las ventas por hora de dailyStats). Los rangos de 7/30 días
+  se comparan con el bloque previo de igual duración.
+Por qué: comparar el día en curso contra un día completo siempre daría
+  "baja"; y un martes contra un lunes mezcla patrones distintos.
+
+[30/09/2026] PROBLEMA — Lint de React 19: setState dentro de useEffect
+Qué pasó: la regla react-hooks/set-state-in-effect marcó leer
+  localStorage/sessionStorage en un efecto y copiarlo al estado (renders
+  en cascada).
+Solución: hook useStoredValue (src/lib/storage.ts) con
+  useSyncExternalStore: el almacenamiento se trata como una fuente externa
+  y React lo lee sin efectos. El servidor devuelve null (= "cargando").
+
+[30/09/2026] STACK — next/font/google
+Para qué lo usé: Fraunces (con eje óptico), Space Grotesk y JetBrains Mono
+  como variables CSS. Se descargan en el build y se sirven desde el mismo
+  dominio: sin pedidos a Google ni saltos de layout.
+
+[30/09/2026] PROBLEMA — Datos de demo poco creíbles en la primera versión
+Qué pasó: al revisar con playwright-cli el ticket promedio daba US$ 6 y las
+  variaciones semanales ~0%.
+Solución: más productos por pedido (ticket ~US$ 10,40) y un factor por
+  semana. También: la regla del resumen elegía un producto chico
+  (focaccia) por ruido → mínimo de 80 unidades.
+
+[30/09/2026] PROBLEMA — El borde dentado del ticket se leía al revés
+Qué pasó: el papel (#FFFDF8) era casi igual a la card (#FFFBF5); se veían
+  los huecos entre dientes y no los dientes.
+Solución: papel blanco puro y una sombra de contorno de 0,6 px.
+
+[30/09/2026] PROBLEMA — Comillas invertidas en un comando de bash
+Qué pasó: al armar texto markdown dentro de comillas dobles de bash, las
+  `comillas invertidas` se ejecutaron como comandos. No hubo daño (fallaron
+  solos), pero rompió el CLAUDE.md, que se reescribió.
+Lo que aprendí: para texto con markdown, usar un editor de archivos o un
+  heredoc con comillas simples ('EOF'), nunca comillas dobles.
+
+[30/09/2026] HERRAMIENTA — Verificación con playwright-cli
+Qué verifiqué: login y panel en desktop 1440 y mobile (iPhone 15) sin
+  scroll horizontal y sin errores de consola; vista "Hoy", búsqueda sin
+  resultados, cambio a inglés y ticket de IA.
+Chequeos automáticos: typecheck, lint, 17 tests y next build sin errores.
+
+================================================================
+FASE 3 — DEPLOY, SEGURIDAD Y CASO DE ESTUDIO
+================================================================
+[30/09/2026] PROBLEMA — Token de Vercel CLI vencido
+Qué pasó: `vercel whoami` → "The specified token is not valid".
+Solución: el usuario corrió `vercel login` (login por dispositivo, en el navegador).
+
+[30/09/2026] HERRAMIENTA — Vercel (deploy de producción)
+Qué es: plataforma de hosting de Next.js; el route handler corre como
+  función serverless.
+URL: https://grano-co-dashboard.vercel.app (proyecto franco02/grano-co-dashboard)
+Cómo: `vercel link --yes --project grano-co-dashboard` + `vercel --prod --yes`.
+Estado: publicado en modo demo (sin variables de entorno). Verificado con
+  playwright-cli en producción: login demo → panel → ticket, sin errores.
+
+[30/09/2026] PROBLEMA — Nombre de proyecto inválido en Vercel
+Qué pasó: Vercel toma el nombre de la carpeta (Dashboard-cafe) y los
+  nombres de proyecto tienen que ir en minúsculas.
+Solución: `vercel link --project grano-co-dashboard`.
+
+[30/09/2026] PROBLEMA — next/font/google falla con Turbopack en Vercel
+Qué pasó: el build en Vercel cortó con "Can't resolve
+  '@vercel/turbopack-next/internal/font/google/font' … next/font/google
+  queries have exactly one entry" (Space Grotesk). En local compilaba bien.
+Solución: el build de producción usa webpack (`next build --webpack`, opción
+  documentada en Next 16). `next dev` sigue con Turbopack.
+Para revisar más adelante: volver a probar Turbopack en una versión nueva de Next.
+
+[30/09/2026] PROBLEMA — ERR_REQUIRE_ESM en /api/summary (500 en Vercel)
+Qué pasó: firebase-admin/auth → jwks-rsa hace require() de jose, que es solo
+  ESM. El runtime de Vercel no lo admite, ni siquiera fijando Node 22
+  (engines.node = "22.x", que igual quedó configurado).
+Solución:
+  1. El ID token de Firebase se verifica con jose directamente
+     (src/lib/firebase/verify-token.ts): firma con las claves públicas de
+     Google, issuer https://securetoken.google.com/<proyecto> y audience
+     <proyecto>. Es el método que documenta Firebase para librerías JWT
+     de terceros.
+  2. firebase-admin se importa de forma dinámica, solo si hay credenciales:
+     en modo demo no se carga nunca.
+Lo que aprendí: un error que no aparece en local puede venir del runtime
+  del hosting; los logs de la función (`vercel logs --json`) muestran el
+  stack completo.
+
+[30/09/2026] DECISIÓN — Montos en pesos argentinos (ARS)
+Qué: se reemplazó USD por ARS en toda la app. Precios de la carta con valores
+  de un café de especialidad en Palermo: café $2.500–4.000 (espresso 2.500,
+  cortado 3.000, flat white 3.800, latte 3.900, filtrado 4.000), medialuna
+  1.300, croissant de almendras 4.200, tostado 6.500, sándwich de pollo y
+  palta 9.800, cold brew 4.500, café en grano 250 g 16.500–19.000.
+Resultado: ticket promedio ~$9.600 y ~$15 M por semana.
+Cómo: money() en src/lib/format.ts usa currency ARS sin centavos
+  (Intl.NumberFormat es-AR → "$ 15.280.100"). También se avisa a Claude en
+  el prompt que los montos están en pesos.
+Fechas: el panel ya calcula "hoy" con la zona horaria de Buenos Aires
+  (verificado: miércoles 30/09/2026, pedidos hasta la hora actual).
+
+[30/09/2026] DECISIÓN — Sin textos de "demo" ni de pruebas en la interfaz
+Qué: se sacaron de la vista "Entrar como demo", "datos ficticios",
+  "Modo demo · sin IA", "Proyecto de portfolio" y la etiqueta de datos de
+  demostración. Ahora: "Entrar al panel" (solo lectura, sin registrarte),
+  usuario "Invitado · solo lectura", "Resumen automático" cuando no hay IA,
+  y el sello "IA" solo aparece si el resumen lo generó Claude.
+  También se renombraron clases CSS (login_demo → login_enter) para que
+  no aparezca "demo" ni al inspeccionar el HTML.
+Por qué: el panel tiene que verse como un producto real.
+Nota: el código interno conserva nombres como isDemo / demoSource (no se ven).
+
+[30/09/2026] DECISIÓN — Secretos fuera del repo y del deploy
+Qué: .env.example documenta todas las variables; .gitignore y .vercelignore
+  excluyen .env*. ANTHROPIC_API_KEY y la cuenta de servicio de Firebase van
+  solo en el servidor (nunca NEXT_PUBLIC_). firestore.rules solo permite
+  lectura con sesión; aiSummaries/aiUsage solo los toca el servidor.
