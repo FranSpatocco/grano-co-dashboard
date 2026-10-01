@@ -416,7 +416,16 @@ Qué pasó: con ANTHROPIC_API_KEY cargada en Vercel, /api/summary devolvía 502.
 Solución: variable opcional ANTHROPIC_WORKSPACE_ID → se manda como header
   anthropic-workspace-id (defaultHeaders del cliente del SDK). La otra salida
   es crear la clave dentro de un workspace en la consola de Anthropic.
-Estado: falta el ID del workspace (wrkspc_...).
+Después apareció un 401 "API key is invalid": la clave cargada ya no servía.
+  El usuario creó una clave nueva y la cargó desde su terminal con
+  `vercel env add ANTHROPIC_API_KEY production --sensitive` (el `!` de Claude
+  Code no sirve: corre en modo no interactivo y no puede pedir el valor).
+Estado: RESUELTO. ANTHROPIC_WORKSPACE_ID + clave nueva en Vercel. Verificado en
+  producción: el resumen lo escribe Claude (~17 s la primera vez, después
+  sale de la caché), con el sello "IA" y "Claude · API de Anthropic".
+Lo que aprendí: Claude cruzó datos que las reglas no cruzaban (medialunas con
+  stock para 0,4 días + faltante del domingo; cold brew + leche de avena) y
+  usó solo números del JSON, como pide el prompt.
 
 [01/10/2026] DECISIÓN — Si Claude falla, el panel no muestra error
 Qué: al cargar la página (GET), si la API de Claude falla se usa el resumen

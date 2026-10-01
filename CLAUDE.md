@@ -160,7 +160,7 @@ Ver `.env.example`.
 ## Estado actual
 - **Fase 0 (planificación):** hecha.
 - **Fase 1 (diseño):** hecha (solo modo claro).
-- **Fase 2 (desarrollo):** primera versión completa. Producción corre en **modo Firebase** (proyecto `grano-co-dashboard`, Firestore en `southamerica-east1`, Auth anónimo + email). Pendiente: cargar la API key de Anthropic.
+- **Fase 2 (desarrollo):** primera versión completa. Producción corre en **modo Firebase** (proyecto `grano-co-dashboard`, Firestore en `southamerica-east1`, Auth anónimo + email) y con el **resumen escrito por Claude** (`ANTHROPIC_API_KEY` + `ANTHROPIC_WORKSPACE_ID` en Vercel). Para cambiar la clave: `vercel env add ANTHROPIC_API_KEY production --sensitive` desde una terminal propia (con `!` no funciona porque es interactivo) y después redeploy.
 
 ## Firebase en producción
 - Consola: https://console.firebase.google.com/project/grano-co-dashboard
