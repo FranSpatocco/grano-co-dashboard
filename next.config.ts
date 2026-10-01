@@ -13,7 +13,7 @@ const csp = [
   "font-src 'self'",
   // Firebase Auth (identitytoolkit, securetoken) y Firestore.
   "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com",
-  "frame-src https://grano-co-dashboard.firebaseapp.com",
+  "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
