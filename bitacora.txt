@@ -351,6 +351,21 @@ Qué: se sacaron de la vista "Entrar como demo", "datos ficticios",
 Por qué: el panel tiene que verse como un producto real.
 Nota: el código interno conserva nombres como isDemo / demoSource (no se ven).
 
+[30/09/2026] HERRAMIENTA — GitHub (repositorio público)
+Qué es: control de versiones + vidriera del código para el portfolio.
+URL: https://github.com/FranSpatocco/grano-co-dashboard (rama main)
+Cómo: git init -b main, commit inicial y `gh repo create --public --source
+  . --push`. Antes de subir se revisó que no hubiera secretos (.env*, .vercel,
+  .next y node_modules quedan afuera por .gitignore) y se agregó un README.
+
+[30/09/2026] PROBLEMA — `vercel git connect` no pudo enlazar el repo
+Qué pasó: "Failed to connect FranSpatocco/grano-co-dashboard to project".
+Causa probable: la GitHub App de Vercel no está instalada en la cuenta de
+  GitHub (o la cuenta de Vercel no tiene GitHub vinculado).
+Estado: producción se actualizó con `vercel --prod` (mismo commit que el
+  repo). Pendiente: instalar la app de Vercel en GitHub y reintentar para que
+  cada push a main se despliegue solo.
+
 [30/09/2026] DECISIÓN — Secretos fuera del repo y del deploy
 Qué: .env.example documenta todas las variables; .gitignore y .vercelignore
   excluyen .env*. ANTHROPIC_API_KEY y la cuenta de servicio de Firebase van
