@@ -160,7 +160,14 @@ Ver `.env.example`.
 ## Estado actual
 - **Fase 0 (planificación):** hecha.
 - **Fase 1 (diseño):** hecha (solo modo claro).
-- **Fase 2 (desarrollo):** primera versión completa, funcionando en modo demo. Pendiente: crear el proyecto de Firebase y cargar la API key de Anthropic.
+- **Fase 2 (desarrollo):** primera versión completa. Producción corre en **modo Firebase** (proyecto `grano-co-dashboard`, Firestore en `southamerica-east1`, Auth anónimo + email). Pendiente: cargar la API key de Anthropic.
+
+## Firebase en producción
+- Consola: https://console.firebase.google.com/project/grano-co-dashboard
+- `.github/workflows/refresh-data.yml` recarga ayer y hoy cada hora (`npm run seed -- --days 1`) con el secreto `FIREBASE_SERVICE_ACCOUNT_BASE64`. Si se apaga, "Hoy" queda vacío en pocos días.
+- Reglas e índices: editar `firestore.rules` / `firestore.indexes.json` y publicar con `firebase deploy --only firestore`.
+- Si se agrega un dominio propio, sumarlo a los dominios autorizados de Firebase Auth o el login falla.
+- La clave de la cuenta de servicio vive fuera del repo. Nunca imprimirla ni commitearla. Al consultar la API de configuración de Auth, mostrar solo los campos necesarios (la respuesta incluye `hashConfig`).
 - **Fase 3 (deploy, seguridad y caso de estudio):** en curso. Publicado en https://grano-co-dashboard.vercel.app (proyecto Vercel `franco02/grano-co-dashboard`, modo demo). Deploy: `vercel --prod --yes`.
 
 ## Gotchas del deploy (no revertir sin probar en Vercel)

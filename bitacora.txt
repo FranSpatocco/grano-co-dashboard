@@ -366,6 +366,54 @@ Solución: el usuario instaló la GitHub App de Vercel y el repo quedó
   conectado al proyecto. Desde ahora cada push a main se despliega solo en
   producción (y cada rama/PR genera un deploy de preview).
 
+[01/10/2026] STACK — Proyecto de Firebase "grano-co-dashboard"
+Qué se armó (casi todo con Firebase CLI):
+  - Proyecto grano-co-dashboard (nombre visible "Grano y Co": Google no
+    acepta "&" en el nombre del proyecto).
+  - App web registrada; su config pública va en NEXT_PUBLIC_FIREBASE_*.
+  - Firestore (default) en southamerica-east1 (São Paulo, lo más cerca de
+    Buenos Aires). Reglas e índices con `firebase deploy --only firestore`
+    (firebase.json + .firebaserc en el repo).
+  - Authentication: Anónimo (botón "Entrar al panel") y Email/contraseña.
+    Dominio grano-co-dashboard.vercel.app autorizado.
+  - Datos: `npm run seed` cargó 13.765 documentos (61 días + stock).
+  - Variables en Vercel (producción y preview) y secreto en GitHub.
+Verificado en producción con playwright-cli: login anónimo 200, lecturas de
+  Firestore, /api/summary 401 sin token y 200 con token, sin errores.
+
+[01/10/2026] DECISIÓN — Refresco horario con GitHub Actions
+Problema: en Firestore los datos quedan congelados el día del seed; en una
+  semana "Hoy" estaría vacío (en modo demo no pasa porque se generan al vuelo).
+Solución: .github/workflows/refresh-data.yml corre cada hora
+  `npm run seed -- --days 1` (ayer y hoy, ~300–450 docs). Como los pedidos
+  son determinísticos, pisa los mismos documentos.
+Costo: ~11.000 escrituras por día, dentro de las 20.000 gratis de Firestore.
+Por qué Actions y no Vercel Cron: el plan Hobby de Vercel solo permite
+  crons diarios; Actions es gratis en repos públicos y permite cada hora.
+
+[01/10/2026] PROBLEMA — Top-level await en scripts/seed.ts
+Qué pasó: tsx lo compila a CommonJS (el package.json no es "type": "module")
+  y CJS no admite await en el nivel superior.
+Solución: el cuerpo del script va dentro de una función main().
+
+[01/10/2026] PROBLEMA — ADMIN_ONLY_OPERATION al entrar como invitado
+Qué pasó: el login anónimo devolvía 400 ADMIN_ONLY_OPERATION. La consulta a
+  la API de configuración (identitytoolkit admin v2) mostró que solo estaba
+  activo Email/contraseña y que el dominio de Vercel no estaba autorizado.
+Solución: PATCH a /admin/v2/projects/grano-co-dashboard/config con la cuenta
+  de servicio (signIn.anonymous.enabled = true + authorizedDomains).
+Lo que aprendí: Firebase Auth solo acepta logins desde dominios autorizados;
+  cada dominio de producción (y uno propio si se agrega) hay que sumarlo.
+Incidente: al leer esa configuración se imprimió en la sesión local el
+  hashConfig (clave de firma de los hashes de contraseñas). No se subió a
+  ningún lado y el proyecto no tiene usuarios con contraseña. Desde ahí, las
+  consultas a esa API muestran solo los campos necesarios.
+
+[01/10/2026] DECISIÓN — Manejo de la clave de la cuenta de servicio
+Dónde vive: un JSON fuera del repo (carpeta "contras" del escritorio), el
+  secreto FIREBASE_SERVICE_ACCOUNT_BASE64 en GitHub Actions y la variable
+  sensible en Vercel. Se cargó por stdin, sin imprimirla.
+
 [30/09/2026] DECISIÓN — Secretos fuera del repo y del deploy
 Qué: .env.example documenta todas las variables; .gitignore y .vercelignore
   excluyen .env*. ANTHROPIC_API_KEY y la cuenta de servicio de Firebase van
