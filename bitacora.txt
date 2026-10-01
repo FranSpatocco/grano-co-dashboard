@@ -362,9 +362,9 @@ Cómo: git init -b main, commit inicial y `gh repo create --public --source
 Qué pasó: "Failed to connect FranSpatocco/grano-co-dashboard to project".
 Causa probable: la GitHub App de Vercel no está instalada en la cuenta de
   GitHub (o la cuenta de Vercel no tiene GitHub vinculado).
-Estado: producción se actualizó con `vercel --prod` (mismo commit que el
-  repo). Pendiente: instalar la app de Vercel en GitHub y reintentar para que
-  cada push a main se despliegue solo.
+Solución: el usuario instaló la GitHub App de Vercel y el repo quedó
+  conectado al proyecto. Desde ahora cada push a main se despliega solo en
+  producción (y cada rama/PR genera un deploy de preview).
 
 [30/09/2026] DECISIÓN — Secretos fuera del repo y del deploy
 Qué: .env.example documenta todas las variables; .gitignore y .vercelignore
