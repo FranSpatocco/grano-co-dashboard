@@ -78,6 +78,8 @@ async function respond(req: NextRequest, lang: Lang, regenerate: boolean) {
   const weekKey = `${adminEnabled ? "firestore" : "demo"}_${lastCompleteWeek(today).from}_${lang}`;
 
   let summary = regenerate ? null : await store.getSummary(weekKey);
+  // Si la IA se activó después de cachear un resumen por reglas, se regenera con Claude.
+  if (summary && aiEnabled && summary.source === "rules") summary = null;
 
   if (regenerate) {
     if (!aiEnabled) return error(503, { error: "ai_unavailable" });
