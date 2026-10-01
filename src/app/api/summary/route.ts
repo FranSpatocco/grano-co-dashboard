@@ -45,7 +45,7 @@ function parseLang(value: unknown): Lang {
   return value === "en" ? "en" : "es";
 }
 
-async function buildSummary(lang: Lang, today: string): Promise<Summary | SummaryError> {
+async function buildSummary(lang: Lang, today: string, useAi: boolean): Promise<Summary | SummaryError> {
   const source = adminEnabled ? adminSource() : demoSource();
   const stats = await weeklyStats(source, today);
   if (stats.daysWithSales < DAYS_REQUIRED) {
@@ -58,7 +58,7 @@ async function buildSummary(lang: Lang, today: string): Promise<Summary | Summar
     generatedAt: new Date().toISOString(),
     lang,
   };
-  if (!aiEnabled) return { ...base, findings: ruleFindings(stats, lang), source: "rules" };
+  if (!useAi) return { ...base, findings: ruleFindings(stats, lang), source: "rules" };
 
   const store = summaryStore();
   if (!(await store.consume(`global_${today}`, GLOBAL_DAILY_CAP))) {
@@ -83,24 +83,27 @@ async function respond(req: NextRequest, lang: Lang, regenerate: boolean) {
 
   if (regenerate) {
     if (!aiEnabled) return error(503, { error: "ai_unavailable" });
-    if (!(await store.consume(usageKey, DAILY_LIMIT))) return error(429, { error: "rate_limited" });
+    if ((await store.usage(usageKey)) >= DAILY_LIMIT) return error(429, { error: "rate_limited" });
   }
 
   if (!summary) {
+    let result: Summary | SummaryError;
     try {
-      const result = await buildSummary(lang, today);
-      if ("error" in result) {
-        return error(result.error === "insufficient_data" ? 422 : 429, result);
-      }
-      summary = result;
-      await store.saveSummary(weekKey, summary);
+      result = await buildSummary(lang, today, aiEnabled);
     } catch (e) {
-      if (e instanceof AiRefusalError || e instanceof Anthropic.APIError) {
-        console.error("Error de la API de Claude:", e.message);
-        return error(502, { error: "ai_unavailable" });
-      }
-      throw e;
+      if (!(e instanceof AiRefusalError || e instanceof Anthropic.APIError)) throw e;
+      console.error("Error de la API de Claude:", e.message);
+      // "Regenerar" muestra el error; al cargar la página se cae al resumen automático.
+      if (regenerate) return error(502, { error: "ai_unavailable" });
+      result = await buildSummary(lang, today, false);
     }
+    if ("error" in result) {
+      return error(result.error === "insufficient_data" ? 422 : 429, result);
+    }
+    summary = result;
+    await store.saveSummary(weekKey, summary);
+    // Solo se descuenta del límite diario si el resumen salió bien.
+    if (regenerate) await store.consume(usageKey, DAILY_LIMIT);
   }
 
   const used = await store.usage(usageKey);
