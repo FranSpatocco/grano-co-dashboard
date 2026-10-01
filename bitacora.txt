@@ -437,6 +437,45 @@ Qué: al cargar la página (GET), si la API de Claude falla se usa el resumen
 Por qué: un problema de configuración o de la API no tiene que romper la
   primera impresión de quien entra al panel.
 
+[01/10/2026] DECISIÓN — Cabeceras de seguridad y CSP (Fase 3)
+Qué: next.config.ts agrega Content-Security-Policy, X-Content-Type-Options,
+  X-Frame-Options DENY, Referrer-Policy y Permissions-Policy; quita
+  X-Powered-By. HSTS lo pone Vercel.
+CSP: variante "sin nonces" de la guía de Next 16 (script-src con
+  'unsafe-inline' por los scripts inline de Next). Con nonces todas las
+  páginas pasarían a renderizarse por pedido; SRI es experimental.
+  connect-src solo a identitytoolkit, securetoken y firestore.googleapis.com;
+  frame-src 'none'; frame-ancestors 'none'.
+
+[01/10/2026] PROBLEMA — getAuth() cargaba apis.google.com (CSP lo bloqueaba)
+Cómo se encontró: Lighthouse (best-practices 92, error de CSP en consola).
+  La prueba con playwright-cli no lo vio porque solo miraba errores.
+Causa: getAuth incluye el resolver de popup/redirect, que descarga gapi.
+Solución: initializeAuth con persistencia indexedDB/localStorage y sin
+  resolver. Verificado: 0 pedidos a apis.google.com, consola vacía, la sesión
+  sobrevive a recargar y "Salir" funciona.
+Lo que aprendí: para revisar CSP hay que escuchar todos los mensajes de
+  consola (page.on("console")), no solo los errores.
+
+[01/10/2026] DECISIÓN — Límite por IP en "Regenerar"
+Por qué: las cuentas anónimas de Firebase se crean gratis con cada sesión,
+  así que el límite de 5 por usuario se podía esquivar. Ahora también hay 10
+  por IP por día, más el tope global diario.
+
+[01/10/2026] PROBLEMA — npm audit: 4 altas en @grpc/grpc-js
+Causa: el SDK web de Firebase (12.19.0, la última) trae grpc-js 1.9.16. npm
+  sugería bajar firebase a la 9.x (sin sentido).
+Solución: "overrides": { "@grpc/grpc-js": "^1.14.5" } (la misma que usa
+  firebase-admin; cambio menor, compatible). Quedan 2 moderadas en uuid
+  (vía gaxios, solo servidor, funciones que la app no usa): documentadas.
+
+[01/10/2026] CONCEPTO — Lighthouse (login en producción)
+Mobile (simulación de 4G lento + CPU x4): performance 74–76, accesibilidad
+  100, buenas prácticas 100, SEO 100. LCP ~3,3 s, TBT ~650 ms.
+Desktop: performance 99, LCP 0,7 s, TBT 100 ms.
+Pendiente para mejorar mobile: cargar el SDK de Firebase recién al tocar
+  "Entrar al panel" (import dinámico), que es lo que más bloquea.
+
 [01/10/2026] DECISIÓN — Manejo de la clave de la cuenta de servicio
 Dónde vive: un JSON fuera del repo (carpeta "contras" del escritorio), el
   secreto FIREBASE_SERVICE_ACCOUNT_BASE64 en GitHub Actions y la variable
