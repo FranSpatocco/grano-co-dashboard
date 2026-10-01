@@ -32,7 +32,9 @@ Prioritize what changes decisions: time slots that need more staff, growing prod
 export class AiRefusalError extends Error {}
 
 export async function claudeFindings(stats: WeeklyStats, lang: "es" | "en"): Promise<string[]> {
-  const client = new Anthropic();
+  // Las claves que no están asociadas a un workspace tienen que indicar cuál usar.
+  const workspaceId = process.env.ANTHROPIC_WORKSPACE_ID;
+  const client = new Anthropic(workspaceId ? { defaultHeaders: { "anthropic-workspace-id": workspaceId } } : {});
   const response = await client.beta.messages.parse({
     model: MODEL,
     max_tokens: 16000,
