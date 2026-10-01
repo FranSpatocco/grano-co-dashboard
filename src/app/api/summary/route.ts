@@ -13,10 +13,15 @@ import type { Summary, SummaryError, SummaryResponse } from "@/lib/schemas";
 
 // Resumen semanal con IA.
 // GET  → devuelve el resumen de la semana (lo genera una sola vez por semana e idioma).
-// POST → "Regenerar": cuenta contra el límite de 5 por usuario por día.
+// POST → "Regenerar": 5 por usuario y 10 por IP por día, más un tope global diario.
 
 const DAILY_LIMIT = 5;
-/** Tope global diario de llamadas a Claude, para acotar el costo si alguien abusa de la demo. */
+/**
+ * Límite por IP: las cuentas anónimas se crean gratis con cada sesión nueva, así que
+ * el límite por usuario solo no alcanza. Es más alto para no castigar redes compartidas.
+ */
+const IP_DAILY_LIMIT = 10;
+/** Tope global diario de llamadas a Claude, para acotar el costo ante cualquier abuso. */
 const GLOBAL_DAILY_CAP = Number(process.env.AI_GLOBAL_DAILY_CAP ?? 200);
 
 type Lang = "es" | "en";
@@ -25,7 +30,12 @@ function error(status: number, body: SummaryError) {
   return Response.json(body, { status });
 }
 
-/** Con Firebase Admin exige un ID token válido; en modo demo identifica por IP. */
+/** IP del cliente según Vercel (el primer valor de x-forwarded-for). */
+function clientIp(req: NextRequest): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+}
+
+/** Con Firebase Admin exige un ID token válido; sin Firebase identifica por IP. */
 async function identify(req: NextRequest): Promise<string | null> {
   if (adminEnabled) {
     const token = req.headers.get("authorization")?.replace(/^Bearer /, "");
@@ -37,8 +47,7 @@ async function identify(req: NextRequest): Promise<string | null> {
       return null;
     }
   }
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  return `ip:${ip}`;
+  return `ip:${clientIp(req)}`;
 }
 
 function parseLang(value: unknown): Lang {
@@ -74,6 +83,8 @@ async function respond(req: NextRequest, lang: Lang, regenerate: boolean) {
   const store = summaryStore();
   const today = toISODate(new Date());
   const usageKey = `${user}_${today}`.replace(/[/.]/g, "-");
+  // Con Firebase el usuario es un uid; se suma un contador por IP (ver IP_DAILY_LIMIT).
+  const ipKey = adminEnabled ? `ip:${clientIp(req)}_${today}`.replace(/[/.]/g, "-") : null;
   // Un resumen por semana cerrada, idioma y origen de datos.
   const weekKey = `${adminEnabled ? "firestore" : "demo"}_${lastCompleteWeek(today).from}_${lang}`;
 
@@ -84,6 +95,7 @@ async function respond(req: NextRequest, lang: Lang, regenerate: boolean) {
   if (regenerate) {
     if (!aiEnabled) return error(503, { error: "ai_unavailable" });
     if ((await store.usage(usageKey)) >= DAILY_LIMIT) return error(429, { error: "rate_limited" });
+    if (ipKey && (await store.usage(ipKey)) >= IP_DAILY_LIMIT) return error(429, { error: "rate_limited" });
   }
 
   if (!summary) {
@@ -103,7 +115,10 @@ async function respond(req: NextRequest, lang: Lang, regenerate: boolean) {
     summary = result;
     await store.saveSummary(weekKey, summary);
     // Solo se descuenta del límite diario si el resumen salió bien.
-    if (regenerate) await store.consume(usageKey, DAILY_LIMIT);
+    if (regenerate) {
+      await store.consume(usageKey, DAILY_LIMIT);
+      if (ipKey) await store.consume(ipKey, IP_DAILY_LIMIT);
+    }
   }
 
   const used = await store.usage(usageKey);

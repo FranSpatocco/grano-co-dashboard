@@ -36,5 +36,8 @@
   },
   "engines": {
     "node": "22.x"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.5"
   }
 }
