@@ -2,7 +2,7 @@
 
 Dashboard de una cafetería de especialidad en Palermo: ventas, productos, pedidos y stock en una sola pantalla, con un **resumen semanal generado con la API de Claude** que aparece como un ticket de café que se imprime.
 
-**En vivo:** https://grano-co-dashboard.vercel.app
+**En vivo:** https://grano-co-dashboard.vercel.app · **Caso de estudio:** https://franco-spatocco.vercel.app/es/projects/ai-dashboard
 
 ## Qué incluye
 
