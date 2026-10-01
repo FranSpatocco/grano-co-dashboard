@@ -409,6 +409,25 @@ Incidente: al leer esa configuración se imprimió en la sesión local el
   ningún lado y el proyecto no tiene usuarios con contraseña. Desde ahí, las
   consultas a esa API muestran solo los campos necesarios.
 
+[01/10/2026] PROBLEMA — La API de Claude responde 400 por el workspace
+Qué pasó: con ANTHROPIC_API_KEY cargada en Vercel, /api/summary devolvía 502.
+  En los logs: "This API key is not scoped to a workspace, so this request
+  must include the anthropic-workspace-id header".
+Solución: variable opcional ANTHROPIC_WORKSPACE_ID → se manda como header
+  anthropic-workspace-id (defaultHeaders del cliente del SDK). La otra salida
+  es crear la clave dentro de un workspace en la consola de Anthropic.
+Estado: falta el ID del workspace (wrkspc_...).
+
+[01/10/2026] DECISIÓN — Si Claude falla, el panel no muestra error
+Qué: al cargar la página (GET), si la API de Claude falla se usa el resumen
+  automático por reglas. Solo "Regenerar" (POST) muestra el estado de error.
+  Además, un "Regenerar" fallido ya no descuenta de los 5 diarios (antes se
+  descontaba aunque el texto de error dijera lo contrario).
+  Un resumen por reglas en caché se regenera con Claude cuando la IA está
+  activa.
+Por qué: un problema de configuración o de la API no tiene que romper la
+  primera impresión de quien entra al panel.
+
 [01/10/2026] DECISIÓN — Manejo de la clave de la cuenta de servicio
 Dónde vive: un JSON fuera del repo (carpeta "contras" del escritorio), el
   secreto FIREBASE_SERVICE_ACCOUNT_BASE64 en GitHub Actions y la variable
