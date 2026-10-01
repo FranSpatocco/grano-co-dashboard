@@ -1,0 +1,23 @@
+# Mantiene los datos de Firestore al día: cada hora vuelve a cargar ayer y hoy
+# (los pedidos son determinísticos, así que pisa los mismos documentos).
+name: Actualizar datos de Firestore
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run seed -- --days 1
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}

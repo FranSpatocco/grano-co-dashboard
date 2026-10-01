@@ -43,3 +43,7 @@ next-env.d.ts
 .playwright-cli/
 
 .vercel
+
+# firebase
+firebase-debug.log
+.firebase/
