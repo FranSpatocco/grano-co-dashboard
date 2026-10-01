@@ -168,7 +168,7 @@ Ver `.env.example`.
 - Reglas e índices: editar `firestore.rules` / `firestore.indexes.json` y publicar con `firebase deploy --only firestore`.
 - Si se agrega un dominio propio, sumarlo a los dominios autorizados de Firebase Auth o el login falla.
 - La clave de la cuenta de servicio vive fuera del repo. Nunca imprimirla ni commitearla. Al consultar la API de configuración de Auth, mostrar solo los campos necesarios (la respuesta incluye `hashConfig`).
-- **Fase 3 (deploy, seguridad y caso de estudio):** en curso. Publicado en https://grano-co-dashboard.vercel.app (proyecto Vercel `franco02/grano-co-dashboard`, modo demo). Deploy: `vercel --prod --yes`.
+- **Fase 3 (deploy, seguridad y caso de estudio):** deploy y seguridad hechos (CSP y cabeceras, límite por IP, auditoría de dependencias, Lighthouse: desktop 99 / mobile ~75, a11y 100). El caso de estudio va en el portfolio. Pendiente opcional: cargar Firebase recién al tocar "Entrar al panel" para mejorar el rendimiento en mobile. Publicado en https://grano-co-dashboard.vercel.app (proyecto Vercel `franco02/grano-co-dashboard`, modo demo). Deploy: `vercel --prod --yes`.
 
 ## Gotchas del deploy (no revertir sin probar en Vercel)
 - `npm run build` usa `next build --webpack`: con Turbopack, `next/font/google` falla en el build de Vercel.
