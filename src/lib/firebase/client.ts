@@ -1,24 +1,19 @@
-import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { browserLocalPersistence, indexedDBLocalPersistence, initializeAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import type { FirebaseApp } from "firebase/app";
+import type { Auth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
+import { firebaseConfig, firebaseEnabled } from "./config";
 
-// Las variables NEXT_PUBLIC_ se incrustan en el bundle: tienen que leerse de forma literal.
-const config = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+// El SDK se carga con import() recién cuando se usa: Auth al iniciar sesión (o si ya
+// había una sesión guardada) y Firestore al pedir datos en el panel. Así el login no
+// descarga ni ejecuta Firebase en la primera visita, que era lo que más frenaba la
+// carga en celular (Lighthouse mobile ~70). Los `import type` no llegan al bundle.
 
-/** Sin configuración de Firebase la app funciona en modo demo, con datos generados. */
-export const firebaseEnabled = Boolean(config.apiKey && config.projectId && config.appId);
+let app: Promise<FirebaseApp> | undefined;
+let auth: Promise<Auth> | undefined;
 
-let app: FirebaseApp | undefined;
-let auth: Auth | undefined;
-
-function firebaseApp(): FirebaseApp {
-  if (!firebaseEnabled) throw new Error("Firebase no está configurado");
-  app ??= getApps()[0] ?? initializeApp(config);
+function firebaseApp(): Promise<FirebaseApp> {
+  if (!firebaseEnabled) return Promise.reject(new Error("Firebase no está configurado"));
+  app ??= import("firebase/app").then(({ getApps, initializeApp }) => getApps()[0] ?? initializeApp(firebaseConfig));
   return app;
 }
 
@@ -27,11 +22,15 @@ function firebaseApp(): FirebaseApp {
  * que descarga apis.google.com/js/api.js (la CSP lo bloquea y suma JavaScript). Este
  * panel solo usa login anónimo y email/contraseña, que no lo necesitan.
  */
-export function clientAuth(): Auth {
-  auth ??= initializeAuth(firebaseApp(), { persistence: [indexedDBLocalPersistence, browserLocalPersistence] });
+export function clientAuth(): Promise<Auth> {
+  auth ??= Promise.all([firebaseApp(), import("firebase/auth")]).then(
+    ([firebase, { browserLocalPersistence, indexedDBLocalPersistence, initializeAuth }]) =>
+      initializeAuth(firebase, { persistence: [indexedDBLocalPersistence, browserLocalPersistence] }),
+  );
   return auth;
 }
 
-export function clientDb(): Firestore {
-  return getFirestore(firebaseApp());
+export async function clientDb(): Promise<Firestore> {
+  const [firebase, { getFirestore }] = await Promise.all([firebaseApp(), import("firebase/firestore")]);
+  return getFirestore(firebase);
 }

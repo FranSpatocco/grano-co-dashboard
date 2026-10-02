@@ -5,7 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArrowRightIcon, BeanIcon, LockIcon, MailIcon } from "@/components/icons";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { useT } from "@/i18n";
-import { firebaseEnabled } from "@/lib/firebase/client";
+import { firebaseEnabled } from "@/lib/firebase/config";
 import { EmailLoginUnavailableError, InvalidCredentialsError, useSession } from "@/lib/session";
 import styles from "./login.module.css";
 

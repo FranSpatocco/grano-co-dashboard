@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { demoSource } from "@/lib/data/demo-source";
 import { firestoreSource } from "@/lib/data/firestore-source";
 import { ORDERS_LIMIT, type DataSource } from "@/lib/data/source";
-import { firebaseEnabled } from "@/lib/firebase/client";
+import { firebaseEnabled } from "@/lib/firebase/config";
 import { previousRange, type DateRange } from "@/lib/period";
 
 function useSource(): DataSource {

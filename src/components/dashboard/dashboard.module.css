@@ -566,16 +566,24 @@
   }
   .kpis :global(.card) {
     padding: 16px;
+    /* Cada tarjeta es su propio contenedor: la cifra se dimensiona con su ancho. */
+    container-type: inline-size;
   }
   .kpiLabel {
     font-size: 13px;
   }
   .kpiValue {
-    font-size: 22px;
+    /* A 22px fijos "$ 15.305.300" no entraba en una tarjeta de ~141px y se partía
+       ("$ 15.305.30" / "0"). 14cqi alcanza para 12 caracteres de la mono en una
+       línea; con 15px de mínimo entra también en pantallas de 320px. */
+    font-size: clamp(15px, 14cqi, 22px);
+    white-space: nowrap;
     margin: 10px 0 8px;
   }
   .kpiText {
     font-size: 20px;
+    /* El nombre del producto sí puede ocupar dos líneas. */
+    white-space: normal;
   }
   .vs {
     display: none;
