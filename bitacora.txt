@@ -475,6 +475,58 @@ Mobile (simulación de 4G lento + CPU x4): performance 74–76, accesibilidad
 Desktop: performance 99, LCP 0,7 s, TBT 100 ms.
 Pendiente para mejorar mobile: cargar el SDK de Firebase recién al tocar
   "Entrar al panel" (import dinámico), que es lo que más bloquea.
+  → Hecho el 01/10/2026 (ver "PROBLEMA — El login descargaba todo Firebase").
+  Mobile después (Lighthouse 12 local contra producción, 4 corridas): 75,
+  75, 83 y 90; antes 70–71 en las mismas condiciones. La variación viene del
+  TBT (530–800 ms) porque la PC estaba cargada; PageSpeed Insights no se pudo
+  usar ese día (cupo diario agotado). Peso del login: 456 KB → 260 KB. CLS 0.
+  Accesibilidad, buenas prácticas y SEO siguen en 100. Desktop: 100 en las
+  cuatro (LCP 0,7 s, TBT 60 ms).
+  Lo que queda es el costo de arrancar React/Next (~700 ms de script con la
+  CPU x4); bajarlo exigiría pasar el login a Server Components.
+
+[01/10/2026] PROBLEMA — El login descargaba todo Firebase (app, auth y firestore)
+Cómo se encontró: Lighthouse mobile, "JavaScript sin usar": un chunk de
+  Firestore (63 KB, 61 KB sin usar) y otro de 142 KB cargaban en /login.
+Causa: login/page.tsx y useDashboardData importaban `firebaseEnabled` desde
+  lib/firebase/client.ts, que importa los tres SDK arriba de todo; además
+  SessionProvider (en toda la app) importaba firebase/auth y arrancaba
+  onAuthStateChanged al abrir cualquier página.
+Solución:
+  - lib/firebase/config.ts: config + firebaseEnabled, sin imports de Firebase.
+  - client.ts: clientAuth() y clientDb() asíncronas con import(); los tipos
+    con `import type` (no llegan al bundle).
+  - session.tsx: Auth se carga al iniciar sesión, o al abrir la app si el
+    navegador ya tenía sesión (marca "grano-auth-hint" en localStorage, se
+    borra al salir o si la sesión venció). Sin marca, el estado es
+    "signed-out" al instante y Firebase no se descarga.
+  - firestore-source.ts: Firestore se carga en la primera consulta del panel.
+  - El error de credenciales se detecta por `code` en vez de
+    `instanceof FirebaseError`, para no importar firebase/app por la clase.
+Verificado con playwright-cli: en /login 0 pedidos a googleapis; "Entrar al
+  panel" muestra datos; la sesión sobrevive a recargar; "Salir" vuelve al
+  login y borra la marca; consola sin errores ni advertencias.
+Lo que aprendí: un `import { constante }` de un módulo arrastra todo lo que
+  ese módulo importa. Las banderas de configuración van en un archivo propio.
+
+[01/10/2026] DESCARTADO — experimental.inlineCss
+Qué es: opción de Next 16 que mete el CSS en el HTML en vez de <link>.
+Por qué se probó: los 2 CSS bloqueaban el render ~0,5 s en 4G lento.
+Por qué se descartó: al pintar antes, la página aparecía con la fuente de
+  reemplazo y al llegar Fraunces el título cambiaba de alto y empujaba el
+  formulario (CLS 0,11 en una de tres corridas). Sin inlineCss: CLS 0 y el
+  mismo rendimiento. Lo que sí quedó: JetBrains Mono sin precarga
+  (preload: false), que en el login es una sola línea.
+
+[01/10/2026] PROBLEMA — La cifra de ventas se partía en dos líneas en celular
+Qué pasaba: a 390px "$ 15.305.300" no entraba en la tarjeta (~141px útiles
+  con la mono a 22px) y quedaba "$ 15.305.30" / "0". Ya estaba en producción.
+Solución: en mobile cada tarjeta de KPI es un contenedor (container-type:
+  inline-size) y la cifra usa font-size: clamp(15px, 14cqi, 22px) con
+  white-space: nowrap. El nombre del producto sí puede ir en dos líneas.
+Verificado: 320, 390 y 412px, con 7 y 30 días: una línea, sin desborde.
+Lo que aprendí: las container queries dimensionan según la tarjeta y no según
+  la pantalla, que es lo que importa en una grilla de 2 columnas.
 
 [01/10/2026] DECISIÓN — Manejo de la clave de la cuenta de servicio
 Dónde vive: un JSON fuera del repo (carpeta "contras" del escritorio), el
