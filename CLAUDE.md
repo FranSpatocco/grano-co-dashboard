@@ -175,3 +175,7 @@ Ver `.env.example`.
 - `engines.node` es `22.x`.
 - No usar `firebase-admin/auth` en el servidor: `jwks-rsa` hace `require()` de `jose` (ESM) y rompe en el runtime de Vercel. El ID token se verifica con `jose` en `src/lib/firebase/verify-token.ts`.
 - `firebase-admin` se importa de forma dinámica (`src/lib/firebase/admin.ts`) para que el modo demo no lo cargue.
+
+## Commits
+
+- Mensajes de commit en inglés, formato Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `ci:`), en imperativo y neutros: describir el cambio, no el contexto personal ni decisiones de negocio pendientes.
